@@ -2,7 +2,7 @@ package Beautifier;
 
 use strict;
 use warnings;
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 sub new()
 {
@@ -124,7 +124,7 @@ sub Beautify($$)
   $fileContent =~ s/[ \t]+/ /g;
 
   ### step 3: spacing around () 
-  my $operators = '(\*\*\=|\+\=|\*\=|\&\=|\<\<\=|\&\&\=|\-\=|\/\=|\|\=|\>\>\=|\|\|\=|\.\=|\%\=|\^\=|x\=|\=\~|\!\~|\<\=|\>\=|\=\=|\!\=|\<\=\>|\&\&|\|\||\.\.|\=)';
+  my $operators = '(\=\>|\*\*\=|\+\=|\*\=|\&\=|\<\<\=|\&\&\=|\-\=|\/\=|\|\=|\>\>\=|\|\|\=|\.\=|\%\=|\^\=|x\=|\=\~|\!\~|\<\=|\>\=|\=\=|\!\=|\<\=\>|\&\&|\|\||\.\.|\=)';
   $fileContent =~ s/ *(\(|\)) */$1/g; ### spaces around ( and )
   $fileContent =~ s/ *($operators) */ $1 /g; ### spaces around =
   if ($spaceBeforeParens)
@@ -138,9 +138,11 @@ sub Beautify($$)
 
 
   ### step 4: handle curly braces
-  $fileContent =~ s/(\)|else|sub \w+)\s*\{\s*/$1$curlyString\n/g; ### Standard else {
-  $fileContent =~ s/(\)|else|sub \w+)\s*\{\s*($randomString[0-9]+;)\s*/$1$curlyString\n$2\n/g; ### with comment # after {
-  $fileContent =~ s/(\)|else|sub \w+)\s*($randomString[0-9]+;)\s*\{\s*/$1$2$curlyString\n/g; ### with comment # before {
+  $fileContent =~ s/(\)|else|sub \w*)\s*\{\s*/$1$curlyString\n/g; ### Standard else {
+  $fileContent =~ s/(\)|else|sub \w*)\s*\{\s*($randomString[0-9]+;)\s*/$1$curlyString\n$2\n/g; ### with comment # after {
+  $fileContent =~ s/(\)|else|sub \w*)\s*($randomString[0-9]+;)\s*\{\s*/$1$2$curlyString\n/g; ### with comment # before {
+  $fileContent =~ s/}\s*else/}\nelse/g; ### } else
+  $fileContent =~ s/;\s*}/;\n}/g; ### sdfsdf; }
 
   ### step 5: add indenting
   my $openCurlies = 0;

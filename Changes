@@ -1,17 +1,21 @@
 Revision history for Perl extension Beautifier.
 
-0.01  Mon Jul 29 17:45:26 2002
+0.01 2002-07-29
 	- original version; created by h2xs 1.20 with options
 		-XA -n Beautifier
 
-0.02 Wed Jul 31 13:26:30 2002
+0.02 2002-07-31
 	- Removed strictifying variables
 	- Removed renaming variables
 	- Updated spacing around () and =
 	- Updated stringvalue recognition
 	- Squashed some bugs
 
-0.03 Fr Aug 02 16:51:23 2002
+0.03 2002-08-02
 	- Added option where to place curly
 	- Added option for space between functionname and (
 	- Fixed some bugs
+
+0.04 2002-11-07
+	- Fixed newlines around else
+	- Fixed some minor bugs
