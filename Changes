@@ -10,3 +10,8 @@ Revision history for Perl extension Beautifier.
 	- Updated spacing around () and =
 	- Updated stringvalue recognition
 	- Squashed some bugs
+
+0.03 Fr Aug 02 16:51:23 2002
+	- Added option where to place curly
+	- Added option for space between functionname and (
+	- Fixed some bugs

@@ -2,7 +2,7 @@ package Beautifier;
 
 use strict;
 use warnings;
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 sub new()
 {
@@ -18,15 +18,25 @@ sub Beautify($$)
   my $options = shift;
   ### Third is a string that contains the code to beautify
   my $fileContent = shift;
-  ### Modify the value of $indent to your preference (use "\t" for a tab)
+  ### get the options from the hashref
   my $indent = "  ";
-  if ($$options{'indent'})
+  if ($$options{'Indent'})
   {
-    $indent = $$options{'indent'};
+    $indent = $$options{'Indent'};
+  }
+  my $curlyString = "\n{";
+  if (($$options{'CurlyBraceOnNewLine'}) && ($$options{'CurlyBraceOnNewLine'} =~ m/^(?:no|0)$/i))
+  {
+    $curlyString = " {";
+  }
+  my $spaceBeforeParens = 1;
+  if (($$options{'SpaceBeforeParenthesisOpen'}) && ($$options{'SpaceBeforeParenthesisOpen'} =~ m/^(?:no|0)$/i))
+  {
+    $spaceBeforeParens = 0;
   }
 
-  ### Random string used for replacing comments and string values temporarily. You don't have to modify this.
-  my $randomString = 'abcdefghijklmnopqrstuvwxyz';
+  ### Random string used for replacing comments and string values temporarily.
+  my $randomString = 'KJSDKfSDKFJKJsdFKKJDKJlkxcljhdfsjlxv';
   
   ### step 0: save all stuff between "" or '' or `` or q{} or qq{} or qx{} or qw{} or m{} or qr{} or s{}{} or tr{}{} or after # or <<EOF
   my $counter = 0;
@@ -107,35 +117,43 @@ sub Beautify($$)
     $counter++;
   }
 
-  ### Step 1 remove leading & trailing whitespace on all lines
+  ### step 1 remove leading & trailing whitespace on all lines
   $fileContent =~ s/[ \t]*\n[ \t]*/\n/g;
 
   ### step 2: remove all but one whitespace between 2 words
   $fileContent =~ s/[ \t]+/ /g;
 
-  ### step 3: move opening curly to new line and append newline
-  $fileContent =~ s/(\)|else|sub \w+)\s*\{\s*/$1\n\{\n/g; ### Standard else {
-  $fileContent =~ s/(\)|else|sub \w+)\s*\{\s*($randomString[0-9]+;)\s*/$1\n\{\n$2\n/g; ### with comment # after {
-  $fileContent =~ s/(\)|else|sub \w+)\s*($randomString[0-9]+;)\s*\{\s*/$1$2\n\{\n/g; ### with comment # before {
+  ### step 3: spacing around () 
+  my $operators = '(\*\*\=|\+\=|\*\=|\&\=|\<\<\=|\&\&\=|\-\=|\/\=|\|\=|\>\>\=|\|\|\=|\.\=|\%\=|\^\=|x\=|\=\~|\!\~|\<\=|\>\=|\=\=|\!\=|\<\=\>|\&\&|\|\||\.\.|\=)';
+  $fileContent =~ s/ *(\(|\)) */$1/g; ### spaces around ( and )
+  $fileContent =~ s/ *($operators) */ $1 /g; ### spaces around =
+  if ($spaceBeforeParens)
+  {
+    $fileContent =~ s/([a-zA-Z0-9])\(/$1 (/g; ### space between open (
+  }
+  else
+  {
+    $fileContent =~ s/([a-zA-Z0-9]) \(/$1(/g; ### no space between open(
+  }
 
-  ### step 4: spacing around () 
-  my $operators = '(\*\*\=|\+\=|\*\=|\&\=|\<\<\=|\&\&\=|\-\=|\/\=|\|\=|\>\>\=|\|\|\=|\.\=|\%\=|\^\=|x\=|\=\~|\!\~|\<\=|\>\=|\=\=|\!\=|\<\=\>|\&\&|\|\||\.\.|\=)'; ###\<|\>|\+|\-|\*|\/|\%|\*\*|\.|\,)';
-  $fileContent =~ s/ *(\(|\)) */$1/g;
-  $fileContent =~ s/ *($operators) */ $1 /g;
-  $fileContent =~ s/(if|while|for|foreach)\(/$1 (/g; ### add after ifs and stuff
+
+  ### step 4: handle curly braces
+  $fileContent =~ s/(\)|else|sub \w+)\s*\{\s*/$1$curlyString\n/g; ### Standard else {
+  $fileContent =~ s/(\)|else|sub \w+)\s*\{\s*($randomString[0-9]+;)\s*/$1$curlyString\n$2\n/g; ### with comment # after {
+  $fileContent =~ s/(\)|else|sub \w+)\s*($randomString[0-9]+;)\s*\{\s*/$1$2$curlyString\n/g; ### with comment # before {
 
   ### step 5: add indenting
   my $openCurlies = 0;
   my @fileContent = split("\n", $fileContent);
   $fileContent = '';
   foreach my $line (@fileContent)
-  { if ($line =~ m/^}/)
+  { if ($line =~ m/^\}/)
     {
       $openCurlies--;
     }
-    $fileContent .= $indent x $openCurlies;
+    $fileContent .= $indent x $openCurlies; ### This inserts the indent string $openCurlies times (at the beginning of the line)
     $fileContent .= $line . "\n";
-    if ($line =~ m/^{/)
+    if (($line =~ m/^\{/) || ($line =~ m/\{$/))
     {
       $openCurlies++;
     }
@@ -173,10 +191,15 @@ Beautifier - Perl extension for beautifying/styling/prettyprinting perl code.
 =head1 DESCRIPTION
 
 This module pretty prints/beautifies perl code.
+It does 3 things:
+- Indenting
+- Spacing around () and = and so forth
+- Curly placing
+
 This might come in handy when working on other people's code (don't you hate that?)
 It uses my coding conventions, like placing the curly on the next line.
-Feel free to change it to your style (which, if different from mine, is wrong)
-Here is what code will look like afterf it's been crunched by Beautifier:
+Feel free to change it to your style (which, if different from mine, is wrong ;)
+Here is what code will look like after it's been crunched by Beautifier:
 
   if (($varName =~ m//) && (-f $fileName))
   {
