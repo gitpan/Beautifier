@@ -1,0 +1,6 @@
+Revision history for Perl extension Beautifier.
+
+0.01  Mon Jul 29 17:45:26 2002
+	- original version; created by h2xs 1.20 with options
+		-XA -n Beautifier
+
